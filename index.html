@@ -924,26 +924,42 @@
             let total;
             let descuentoAplicado = 0;
 
-            if (dias === 30 && descuentoPorcentaje === 0) {
-                // Mes completo SIN DESCUENTO: Total debe ser EXACTAMENTE el precio de tabla
+            // La cuota administrativa es FIJA basada en SMMLV, no varía con el IBC
+            // Solo se calcula una vez con el SMMLV base
+            const cuotaAdminFija = cuotaAdminTabla;
+
+            // Verificar si estamos en el caso base (IBC = SMMLV)
+            const esIBCBase = ibc === SMMLV;
+
+            if (dias === 30 && descuentoPorcentaje === 0 && esIBCBase) {
+                // Caso ESPECIAL: IBC = SMMLV, 30 días, sin descuento
+                // Total debe ser EXACTAMENTE el precio de tabla 2026
                 total = precioTabla;
-                // Cuota admin es la diferencia para llegar al precio exacto
                 cuotaAdmin = precioTabla - sumaEntidades;
-            } else if (dias === 30 && descuentoPorcentaje > 0) {
-                // Mes completo CON DESCUENTO
-                // 1. Cuota admin completa
-                let cuotaAdminInicial = cuotaAdminTabla;
                 
-                // 2. Aplicar descuento a la cuota admin
-                descuentoAplicado = cuotaAdminInicial * (descuentoPorcentaje / 100);
-                cuotaAdminInicial = cuotaAdminInicial - descuentoAplicado;
+            } else if (dias === 30 && descuentoPorcentaje === 0) {
+                // Mes completo SIN DESCUENTO, pero IBC ≠ SMMLV
+                // Aplicar redondeo a 900
+                const totalProvisional = sumaEntidades + cuotaAdminFija;
                 
-                const totalProvisional = sumaEntidades + cuotaAdminInicial;
-                
-                // 3. Redondear total para que termine en 900
+                // Redondear total para que termine en 900
                 total = redondearA900(totalProvisional);
                 
-                // 4. Ajustar cuota admin para que la suma coincida con el total redondeado
+                // Ajustar cuota admin para que la suma coincida con el total redondeado
+                cuotaAdmin = total - sumaEntidades;
+                
+            } else if (dias === 30 && descuentoPorcentaje > 0) {
+                // Mes completo CON DESCUENTO
+                // 1. Aplicar descuento a la cuota admin fija
+                descuentoAplicado = cuotaAdminFija * (descuentoPorcentaje / 100);
+                const cuotaAdminConDescuento = cuotaAdminFija - descuentoAplicado;
+                
+                const totalProvisional = sumaEntidades + cuotaAdminConDescuento;
+                
+                // 2. Redondear total para que termine en 900
+                total = redondearA900(totalProvisional);
+                
+                // 3. Ajustar cuota admin para que la suma coincida con el total redondeado
                 cuotaAdmin = total - sumaEntidades;
                 
             } else {
@@ -951,7 +967,7 @@
                 
                 if (prorratearAdmin) {
                     // CON PRORRATEO (sin descuento)
-                    const cuotaAdminProrrateada = (cuotaAdminTabla / 30) * dias;
+                    const cuotaAdminProrrateada = (cuotaAdminFija / 30) * dias;
                     const cuotaAdminInicial = redondearA900(cuotaAdminProrrateada);
                     
                     const totalProvisional = sumaEntidades + cuotaAdminInicial;
@@ -964,24 +980,21 @@
                     
                 } else if (descuentoPorcentaje > 0) {
                     // CON DESCUENTO (sin prorrateo)
-                    // 1. Cuota admin completa
-                    let cuotaAdminInicial = cuotaAdminTabla;
+                    // 1. Aplicar descuento a cuota admin fija
+                    descuentoAplicado = cuotaAdminFija * (descuentoPorcentaje / 100);
+                    const cuotaAdminConDescuento = cuotaAdminFija - descuentoAplicado;
                     
-                    // 2. Aplicar descuento a la cuota admin
-                    descuentoAplicado = cuotaAdminInicial * (descuentoPorcentaje / 100);
-                    cuotaAdminInicial = cuotaAdminInicial - descuentoAplicado;
+                    const totalProvisional = sumaEntidades + cuotaAdminConDescuento;
                     
-                    const totalProvisional = sumaEntidades + cuotaAdminInicial;
-                    
-                    // 3. Redondear total para que termine en 900
+                    // 2. Redondear total para que termine en 900
                     total = redondearA900(totalProvisional);
                     
-                    // 4. Ajustar cuota admin para que la suma coincida con el total redondeado
+                    // 3. Ajustar cuota admin para que la suma coincida con el total redondeado
                     cuotaAdmin = total - sumaEntidades;
                     
                 } else {
                     // SIN PRORRATEO NI DESCUENTO: Cuota admin completa + ajuste al final
-                    const cuotaAdminInicial = cuotaAdminTabla;
+                    const cuotaAdminInicial = cuotaAdminFija;
                     
                     const totalProvisional = sumaEntidades + cuotaAdminInicial;
                     
@@ -993,14 +1006,15 @@
                 }
             }
 
-            displayResults(total, { eps, arl, ccf, afp, cuotaAdmin, descuento: descuentoAplicado, ccfCalculado }, componentes);
+            displayResults(total, { eps, arl, ccf, afp, cuotaAdmin, descuento: descuentoAplicado, ccfCalculado, ibc, smmlv: SMMLV }, componentes);
         }
 
         function displayResults(total, breakdown, componentes) {
             const resultContent = document.getElementById('resultContent');
-            const ibc = getCurrencyValue(document.getElementById('ibc'));
+            const ibc = breakdown.ibc;
             const dias = diasCotizar;
             const descuentoPorcentaje = parseFloat(document.getElementById('descuento').value) || 0;
+            const SMMLV = breakdown.smmlv;
             
             // Calcular subtotal de aportes (entidades sin cuota admin)
             const subtotalAportes = breakdown.eps + breakdown.arl + breakdown.ccf + breakdown.afp;
@@ -1081,13 +1095,27 @@
             `;
 
             // Cuota Administrativa
+            const esIBCBase = ibc === SMMLV;
+            const esCasoTabla = dias === 30 && descuentoPorcentaje === 0 && esIBCBase;
             const esCuotaCompleta = dias < 30 && !document.getElementById('prorratearAdmin').checked;
+            
+            let mensajeCuotaAdmin;
+            if (esCasoTabla) {
+                mensajeCuotaAdmin = 'Precio de tabla 2026 (IBC = SMMLV)';
+            } else if (dias === 30) {
+                mensajeCuotaAdmin = 'Cuota fija + ajuste de redondeo (total termina en 900)';
+            } else if (esCuotaCompleta) {
+                mensajeCuotaAdmin = 'Cuota completa + ajuste de redondeo';
+            } else {
+                mensajeCuotaAdmin = 'Prorrateada + ajuste de redondeo';
+            }
+            
             resultHTML += `
                     <div style="padding: 1.25rem; margin-bottom: 0.75rem; background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); border-radius: 8px; border: 2px solid #F59E0B;">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <div>
                                 <div style="font-weight: 600; color: #92400E; font-size: 1.1rem;">Cuota Administrativa</div>
-                                <div style="font-size: 0.75rem; color: #92400E; margin-top: 0.25rem;">${esCuotaCompleta ? 'Siempre se cobra completa (no proporcional)' : dias === 30 ? 'Mes completo' : 'Prorrateada y ajustada'}</div>
+                                <div style="font-size: 0.75rem; color: #92400E; margin-top: 0.25rem;">${mensajeCuotaAdmin}</div>
                             </div>
                             <div style="font-size: 1.5rem; font-weight: 700; color: #B45309;">$${breakdown.cuotaAdmin.toLocaleString('es-CO')}</div>
                         </div>
