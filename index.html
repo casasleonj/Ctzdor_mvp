@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cotizador de Planes - Cervialis 2026</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0066CC;
+            --primary-dark: #004A99;
+            --secondary: #00B894;
+            --background: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --text-primary: #1E293B;
+            --text-secondary: #64748B;
+            --border: #E2E8F0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        .form-section, .result-section {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .section-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--primary-dark);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .currency-symbol {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        input[type="number"], input[type="text"], input[type="date"] {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            padding-left: 2.5rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        input[type="date"], input[type="number"] {
+            padding-left: 1rem;
+        }
+
+        input[type="number"]:disabled {
+            background-color: #F1F5F9;
+            cursor: not-allowed;
+        }
+
+        input[type="number"]:invalid {
+            border-color: #EF4444;
+        }
+
+        input[type="number"]:focus, input[type="text"]:focus, input[type="date"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        }
+
+        .range-container {
+            margin-top: 0.5rem;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--primary);
+            cursor: pointer;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            background: var(--primary-dark);
+            transform: scale(1.2);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: var(--primary);
+            cursor: pointer;
+            border-radius: 50%;
+            border: none;
+        }
+
+        .days-display {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-top: 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .risk-levels {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.5rem;
+        }
+
+        .risk-btn {
+            padding: 0.75rem 0.5rem;
+            border: 2px solid var(--border);
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .risk-btn:hover {
+            border-color: var(--primary);
+            background: rgba(0, 102, 204, 0.05);
+        }
+
+        .risk-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .risk-percentage {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            display: block;
+            margin-top: 0.25rem;
+        }
+
+        .risk-btn.active .risk-percentage {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .plans-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .plan-card {
+            padding: 1.25rem;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .plan-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .plan-card.selected {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, rgba(0, 102, 204, 0.05) 0%, rgba(0, 184, 148, 0.05) 100%);
+            box-shadow: var(--shadow);
+        }
+
+        .plan-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary-dark);
+        }
+
+        .plan-includes {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .plan-tag {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            background: var(--secondary);
+            color: white;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-right: 0.25rem;
+            margin-top: 0.25rem;
+        }
+
+        .result-section {
+            position: sticky;
+            top: 2rem;
+        }
+
+        .result-header {
+            text-align: center;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: 12px;
+            color: white;
+            margin-bottom: 1.5rem;
+        }
+
+        .result-amount {
+            font-size: 3rem;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .result-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-top: 0.5rem;
+        }
+
+        .breakdown {
+            margin-top: 1.5rem;
+        }
+
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            background: var(--background);
+            border-radius: 8px;
+            border-left: 4px solid var(--border);
+        }
+
+        .breakdown-item.highlight {
+            border-left-color: var(--secondary);
+        }
+
+        .breakdown-item.admin {
+            border-left-color: var(--primary);
+        }
+
+        .breakdown-label {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .breakdown-value {
+            font-weight: 600;
+            color: var(--primary-dark);
+        }
+
+        .components-list {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid var(--border);
+        }
+
+        .component-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background: white;
+            border: 2px solid var(--secondary);
+            border-radius: 20px;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--secondary);
+            font-size: 0.9rem;
+        }
+
+        .component-badge::before {
+            content: "✓";
+            margin-right: 0.5rem;
+            font-weight: 700;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 968px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .result-section {
+                position: static;
+            }
+
+            .plans-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .risk-levels {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .result-amount {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .risk-levels {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, rgba(0, 184, 148, 0.1) 0%, rgba(0, 102, 204, 0.1) 100%);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Toggle Switch Styles */
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            display: inline-block;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #CBD5E1;
+            transition: 0.3s;
+            border-radius: 30px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background-color: var(--primary);
+        }
+
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(30px);
+        }
+
+        .toggle-switch input:focus + .toggle-slider {
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        }
+
+        .toggle-switch input:disabled + .toggle-slider {
+            background-color: #E2E8F0;
+            cursor: not-allowed;
+        }
+
+        .toggle-switch input:disabled + .toggle-slider:before {
+            background-color: #CBD5E1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Cotizador de Seguridad Social</h1>
+            <p class="subtitle">Cervialis - Planes 2026</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Formulario -->
+            <div class="form-section">
+                <h2 class="section-title">Datos de Cotización</h2>
+
+                <div class="form-group">
+                    <label for="ibc">IBC - Ingreso Base de Cotización</label>
+                    <div class="input-wrapper">
+                        <span class="currency-symbol">$</span>
+                        <input type="text" id="ibc" value="1,750,905" oninput="formatCurrency(this); calculate()">
+                    </div>
+                    <div class="info-box">
+                        SMMLV 2026: $1,750,905
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="fechaIngreso">Fecha de Ingreso</label>
+                    <div class="input-wrapper">
+                        <input type="date" id="fechaIngreso" style="padding-left: 1rem;" onchange="calculateDaysFromIngreso()">
+                    </div>
+                    <div class="info-box" style="margin-top: 0.5rem;">
+                        📅 Calcula automáticamente desde la fecha de ingreso hasta fin de mes. Mes completo = 30 días según normativa PILA.
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="days-display" id="diasDisplay">Selecciona la fecha de ingreso</div>
+                    <div id="periodoDisplay" style="text-align: center; font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.5rem;"></div>
+                </div>
+
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                        <span style="font-weight: 500;">Prorratear Cuota Administrativa</span>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="prorratearAdmin" onchange="toggleProrrateo()">
+                            <span class="toggle-slider"></span>
+                        </div>
+                    </label>
+                    <div class="info-box" style="margin-top: 0.5rem; font-size: 0.8rem;">
+                        <strong>Desactivado:</strong> Cuota admin completa + ajuste al final<br>
+                        <strong>Activado:</strong> Cuota admin proporcional a días
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="descuento">Descuento sobre Cuota Administrativa (%)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="descuento" value="0" min="0" max="50" step="0.1" 
+                               style="padding-left: 1rem;" oninput="validarDescuento()" placeholder="0" 
+                               onkeypress="return soloNumerosPositivos(event)"
+                               onpaste="validarPegado(event)">
+                    </div>
+                    <div class="info-box" style="margin-top: 0.5rem; font-size: 0.8rem;">
+                        ⚠️ Máximo 50% de descuento. Se aplica solo a la cuota administrativa. No compatible con prorrateo.
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Nivel de Riesgo ARL</label>
+                    <div class="risk-levels" id="riskLevels">
+                        <div class="risk-btn active" onclick="selectRisk(1, 0.522, this)">
+                            <strong>I</strong>
+                            <span class="risk-percentage">0.522%</span>
+                        </div>
+                        <div class="risk-btn" onclick="selectRisk(2, 1.044, this)">
+                            <strong>II</strong>
+                            <span class="risk-percentage">1.044%</span>
+                        </div>
+                        <div class="risk-btn" onclick="selectRisk(3, 2.436, this)">
+                            <strong>III</strong>
+                            <span class="risk-percentage">2.436%</span>
+                        </div>
+                        <div class="risk-btn" onclick="selectRisk(4, 4.350, this)">
+                            <strong>IV</strong>
+                            <span class="risk-percentage">4.35%</span>
+                        </div>
+                        <div class="risk-btn" onclick="selectRisk(5, 6.960, this)">
+                            <strong>V</strong>
+                            <span class="risk-percentage">6.96%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Selecciona tu Plan</label>
+                    <div class="plans-grid">
+                        <div class="plan-card" onclick="selectPlan('minimo', this)">
+                            <div class="plan-name">Plan Mínimo</div>
+                            <div class="plan-includes">
+                                <span class="plan-tag">EPS</span>
+                                <span class="plan-tag">ARL</span>
+                            </div>
+                        </div>
+                        <div class="plan-card" onclick="selectPlan('basico', this)">
+                            <div class="plan-name">Plan Básico</div>
+                            <div class="plan-includes">
+                                <span class="plan-tag">EPS</span>
+                                <span class="plan-tag">ARL</span>
+                                <span class="plan-tag">CCF</span>
+                            </div>
+                        </div>
+                        <div class="plan-card" onclick="selectPlan('proteccion', this)">
+                            <div class="plan-name">Plan Protección</div>
+                            <div class="plan-includes">
+                                <span class="plan-tag">EPS</span>
+                                <span class="plan-tag">ARL</span>
+                                <span class="plan-tag">AFP</span>
+                            </div>
+                        </div>
+                        <div class="plan-card" onclick="selectPlan('completo', this)">
+                            <div class="plan-name">Plan Completo</div>
+                            <div class="plan-includes">
+                                <span class="plan-tag">EPS</span>
+                                <span class="plan-tag">ARL</span>
+                                <span class="plan-tag">CCF</span>
+                                <span class="plan-tag">AFP</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resultados -->
+            <div class="result-section">
+                <h2 class="section-title">Cotización</h2>
+                <div id="resultContent">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📋</div>
+                        <p>Selecciona un plan para ver tu cotización</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuración de planes
+        const SMMLV = 1750905;
+        
+        // Precios de tabla PLANES 2026 (30 días)
+        const PRECIOS_TABLA = {
+            minimo: [146900, 156900, 178900, 211900, 257900],
+            basico: [215900, 226900, 248900, 281900, 327900],
+            proteccion: [428900, 436900, 458900, 492900, 537900],
+            completo: [498900, 506900, 528900, 562900, 611900]
+        };
+
+        // Porcentajes
+        const PORCENTAJES = {
+            eps: 4,
+            ccf: 4,
+            afp: 16,
+            arl: [0.522, 1.044, 2.436, 4.350, 6.960]
+        };
+
+        // Componentes por plan
+        const COMPONENTES_PLAN = {
+            minimo: ['EPS', 'ARL', 'CCF'],
+            basico: ['EPS', 'ARL', 'CCF'],
+            proteccion: ['EPS', 'ARL', 'AFP', 'CCF'],
+            completo: ['EPS', 'ARL', 'CCF', 'AFP']
+        };
+
+        // CCF: algunos planes calculan 4%, otros tienen valor fijo de $100
+        const CCF_CALCULADO = {
+            minimo: false,      // CCF = $100 fijo
+            basico: true,       // CCF = 4% calculado
+            proteccion: false,  // CCF = $100 fijo
+            completo: true      // CCF = 4% calculado
+        };
+
+        let selectedPlan = null;
+        let selectedRiskLevel = 0; // índice 0 = Nivel I
+        let selectedRiskPercentage = 0.522;
+        let diasCotizar = 0;
+
+        function formatCurrency(input) {
+            let value = input.value.replace(/[^\d]/g, '');
+            if (value) {
+                input.value = parseInt(value).toLocaleString('es-CO');
+            }
+        }
+
+        function getCurrencyValue(input) {
+            return parseInt(input.value.replace(/[^\d]/g, '')) || 0;
+        }
+
+        function calculateDaysFromIngreso() {
+            const fechaIngreso = document.getElementById('fechaIngreso').value;
+            const displayElement = document.getElementById('diasDisplay');
+            const periodoElement = document.getElementById('periodoDisplay');
+
+            if (!fechaIngreso) {
+                displayElement.textContent = 'Selecciona la fecha de ingreso';
+                displayElement.style.color = 'var(--text-secondary)';
+                periodoElement.textContent = '';
+                diasCotizar = 0;
+                return;
+            }
+
+            // Parsear fecha de ingreso correctamente sin problemas de zona horaria
+            const [año, mes, dia] = fechaIngreso.split('-').map(Number);
+            const ingreso = new Date(año, mes - 1, dia);
+
+            // Calcular último día del mes de ingreso
+            const ultimoDiaMes = new Date(año, mes, 0).getDate();
+            const finMes = new Date(año, mes - 1, ultimoDiaMes);
+
+            // Formatear fechas para mostrar
+            const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 
+                          'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+            const nombreMes = meses[mes - 1];
+
+            // Verificar si es mes completo (día 1 hasta último día del mes)
+            const esMesCompleto = dia === 1;
+
+            if (esMesCompleto) {
+                // Mes completo = siempre 30 días según PILA
+                diasCotizar = 30;
+                displayElement.textContent = '✓ 30 días (mes completo)';
+                displayElement.style.color = 'var(--secondary)';
+                periodoElement.textContent = `Del 1 al ${ultimoDiaMes} de ${nombreMes}`;
+            } else {
+                // Días parciales: calcular diferencia + 1 (incluye día de ingreso)
+                const diffTime = Math.abs(finMes - ingreso);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                diasCotizar = diffDays;
+                displayElement.textContent = `${diffDays} día${diffDays > 1 ? 's' : ''} a cotizar`;
+                displayElement.style.color = 'var(--primary)';
+                periodoElement.textContent = `Del ${dia} al ${ultimoDiaMes} de ${nombreMes}`;
+            }
+
+            calculate();
+        }
+
+        function calculateDays() {
+            // Función legacy - redirigir a la nueva
+            calculateDaysFromIngreso();
+        }
+
+        function updateDays() {
+            // Función legacy - ya no se usa con selector de fechas
+        }
+
+        function validarPegado(event) {
+            // Prevenir el pegado por defecto
+            event.preventDefault();
+            
+            // Obtener el texto pegado
+            const pastedText = (event.clipboardData || window.clipboardData).getData('text');
+            
+            // Limpiar: eliminar espacios, letras, caracteres especiales excepto números y punto
+            const cleaned = pastedText.replace(/[^\d.]/g, '');
+            
+            // Convertir a número
+            let valor = parseFloat(cleaned);
+            
+            // Validar
+            if (isNaN(valor) || valor < 0) {
+                valor = 0;
+            } else if (valor > 50) {
+                valor = 50;
+            }
+            
+            // Establecer el valor validado
+            document.getElementById('descuento').value = valor;
+            
+            // Aplicar descuento
+            validarDescuento();
+        }
+
+        function soloNumerosPositivos(event) {
+            // Permitir solo números, punto decimal y teclas de control
+            const charCode = event.which ? event.which : event.keyCode;
+            
+            // Permitir: backspace, delete, tab, escape, enter, punto decimal
+            if (charCode === 46 || charCode === 8 || charCode === 9 || charCode === 27 || charCode === 13) {
+                return true;
+            }
+            
+            // Bloquear signo negativo (-)
+            if (charCode === 45) {
+                return false;
+            }
+            
+            // Asegurar que es un número (0-9)
+            if (charCode < 48 || charCode > 57) {
+                return false;
+            }
+            
+            return true;
+        }
+
+        function validarDescuento() {
+            const descuentoInput = document.getElementById('descuento');
+            let valor = parseFloat(descuentoInput.value);
+            
+            // Si no es un número válido, establecer en 0
+            if (isNaN(valor) || valor < 0) {
+                descuentoInput.value = 0;
+                valor = 0;
+            }
+            
+            // Si excede el máximo de 50%, limitarlo
+            if (valor > 50) {
+                descuentoInput.value = 50;
+                valor = 50;
+            }
+            
+            // Aplicar el descuento validado
+            aplicarDescuento();
+        }
+
+        function toggleProrrateo() {
+            const prorratearAdmin = document.getElementById('prorratearAdmin').checked;
+            const descuentoInput = document.getElementById('descuento');
+            
+            if (prorratearAdmin) {
+                // Si se activa prorrateo, deshabilitar y resetear descuento
+                descuentoInput.value = 0;
+                descuentoInput.disabled = true;
+                descuentoInput.style.opacity = '0.5';
+                descuentoInput.style.cursor = 'not-allowed';
+            } else {
+                // Si se desactiva prorrateo, habilitar descuento
+                descuentoInput.disabled = false;
+                descuentoInput.style.opacity = '1';
+                descuentoInput.style.cursor = 'text';
+            }
+            
+            calculate();
+        }
+
+        function aplicarDescuento() {
+            const descuento = parseFloat(document.getElementById('descuento').value) || 0;
+            const prorratearCheckbox = document.getElementById('prorratearAdmin');
+            
+            if (descuento > 0) {
+                // Si se aplica descuento, deshabilitar prorrateo
+                prorratearCheckbox.checked = false;
+                prorratearCheckbox.disabled = true;
+                prorratearCheckbox.parentElement.style.opacity = '0.5';
+                prorratearCheckbox.parentElement.style.cursor = 'not-allowed';
+            } else {
+                // Si no hay descuento, habilitar prorrateo
+                prorratearCheckbox.disabled = false;
+                prorratearCheckbox.parentElement.style.opacity = '1';
+                prorratearCheckbox.parentElement.style.cursor = 'pointer';
+            }
+            
+            calculate();
+        }
+
+        function selectRisk(level, percentage, element) {
+            document.querySelectorAll('.risk-btn').forEach(btn => btn.classList.remove('active'));
+            element.classList.add('active');
+            selectedRiskLevel = level - 1; // índice del array
+            selectedRiskPercentage = percentage;
+            calculate();
+        }
+
+        function selectPlan(plan, element) {
+            document.querySelectorAll('.plan-card').forEach(card => card.classList.remove('selected'));
+            element.classList.add('selected');
+            selectedPlan = plan;
+            calculate();
+        }
+
+        function redondearCentena(valor) {
+            // Redondear hacia arriba a la centena más cercana
+            return Math.ceil(valor / 100) * 100;
+        }
+
+        function redondearA900(valor) {
+            // Redondear al siguiente múltiplo de 1000 y restar 100 para terminar en 900
+            // Ejemplos: 67,234 → 67,900 | 67,600 → 67,900 | 68,001 → 68,900
+            return Math.ceil(valor / 1000) * 1000 - 100;
+        }
+
+        function calculate() {
+            if (!selectedPlan || diasCotizar === 0) {
+                return;
+            }
+
+            const ibc = getCurrencyValue(document.getElementById('ibc'));
+            const dias = diasCotizar;
+            const prorratearAdmin = document.getElementById('prorratearAdmin').checked;
+            const descuentoPorcentaje = parseFloat(document.getElementById('descuento').value) || 0;
+
+            // Calcular porcentaje total del plan (para cálculo de cuota admin base)
+            let porcentajeTotal = PORCENTAJES.eps + selectedRiskPercentage;
+            
+            const componentes = COMPONENTES_PLAN[selectedPlan];
+            const ccfCalculado = CCF_CALCULADO[selectedPlan];
+            
+            if (ccfCalculado) {
+                porcentajeTotal += PORCENTAJES.ccf;
+            }
+            if (componentes.includes('AFP')) {
+                porcentajeTotal += PORCENTAJES.afp;
+            }
+
+            const precioTabla = PRECIOS_TABLA[selectedPlan][selectedRiskLevel];
+            const costosEntidadesBase = (SMMLV * porcentajeTotal) / 100;
+            const cuotaAdminTabla = precioTabla - costosEntidadesBase;
+
+            // Desglose individual de entidades
+            const eps = redondearCentena((ibc * PORCENTAJES.eps / 100 / 30) * dias);
+            const arl = redondearCentena((ibc * selectedRiskPercentage / 100 / 30) * dias);
+            
+            // CCF: calculado (4%) o fijo ($100)
+            let ccf;
+            if (ccfCalculado) {
+                // CCF calculado como porcentaje del IBC
+                ccf = redondearCentena((ibc * PORCENTAJES.ccf / 100 / 30) * dias);
+            } else {
+                // CCF fijo de $100 (no proporcional)
+                ccf = 100;
+            }
+            
+            const afp = componentes.includes('AFP') ? redondearCentena((ibc * PORCENTAJES.afp / 100 / 30) * dias) : 0;
+
+            const sumaEntidades = eps + arl + ccf + afp;
+
+            let cuotaAdmin;
+            let total;
+            let descuentoAplicado = 0;
+
+            if (dias === 30 && descuentoPorcentaje === 0) {
+                // Mes completo SIN DESCUENTO: Total debe ser EXACTAMENTE el precio de tabla
+                total = precioTabla;
+                // Cuota admin es la diferencia para llegar al precio exacto
+                cuotaAdmin = precioTabla - sumaEntidades;
+            } else if (dias === 30 && descuentoPorcentaje > 0) {
+                // Mes completo CON DESCUENTO
+                // 1. Cuota admin completa
+                let cuotaAdminInicial = cuotaAdminTabla;
+                
+                // 2. Aplicar descuento a la cuota admin
+                descuentoAplicado = cuotaAdminInicial * (descuentoPorcentaje / 100);
+                cuotaAdminInicial = cuotaAdminInicial - descuentoAplicado;
+                
+                const totalProvisional = sumaEntidades + cuotaAdminInicial;
+                
+                // 3. Redondear total para que termine en 900
+                total = redondearA900(totalProvisional);
+                
+                // 4. Ajustar cuota admin para que la suma coincida con el total redondeado
+                cuotaAdmin = total - sumaEntidades;
+                
+            } else {
+                // Días parciales: depende del toggle de prorrateo y descuento
+                
+                if (prorratearAdmin) {
+                    // CON PRORRATEO (sin descuento)
+                    const cuotaAdminProrrateada = (cuotaAdminTabla / 30) * dias;
+                    const cuotaAdminInicial = redondearA900(cuotaAdminProrrateada);
+                    
+                    const totalProvisional = sumaEntidades + cuotaAdminInicial;
+                    
+                    // Redondear total para que termine en 900
+                    total = redondearA900(totalProvisional);
+                    
+                    // Ajustar cuota admin para que la suma coincida con el total redondeado
+                    cuotaAdmin = total - sumaEntidades;
+                    
+                } else if (descuentoPorcentaje > 0) {
+                    // CON DESCUENTO (sin prorrateo)
+                    // 1. Cuota admin completa
+                    let cuotaAdminInicial = cuotaAdminTabla;
+                    
+                    // 2. Aplicar descuento a la cuota admin
+                    descuentoAplicado = cuotaAdminInicial * (descuentoPorcentaje / 100);
+                    cuotaAdminInicial = cuotaAdminInicial - descuentoAplicado;
+                    
+                    const totalProvisional = sumaEntidades + cuotaAdminInicial;
+                    
+                    // 3. Redondear total para que termine en 900
+                    total = redondearA900(totalProvisional);
+                    
+                    // 4. Ajustar cuota admin para que la suma coincida con el total redondeado
+                    cuotaAdmin = total - sumaEntidades;
+                    
+                } else {
+                    // SIN PRORRATEO NI DESCUENTO: Cuota admin completa + ajuste al final
+                    const cuotaAdminInicial = cuotaAdminTabla;
+                    
+                    const totalProvisional = sumaEntidades + cuotaAdminInicial;
+                    
+                    // Redondear total para que termine en 900
+                    total = redondearA900(totalProvisional);
+                    
+                    // Ajustar cuota admin para que la suma coincida con el total redondeado
+                    cuotaAdmin = total - sumaEntidades;
+                }
+            }
+
+            displayResults(total, { eps, arl, ccf, afp, cuotaAdmin, descuento: descuentoAplicado, ccfCalculado }, componentes);
+        }
+
+        function displayResults(total, breakdown, componentes) {
+            const resultContent = document.getElementById('resultContent');
+            const ibc = getCurrencyValue(document.getElementById('ibc'));
+            const dias = diasCotizar;
+            const descuentoPorcentaje = parseFloat(document.getElementById('descuento').value) || 0;
+            
+            // Calcular subtotal de aportes (entidades sin cuota admin)
+            const subtotalAportes = breakdown.eps + breakdown.arl + breakdown.ccf + breakdown.afp;
+            
+            // Header con IBC
+            let resultHTML = `
+                <div class="fade-in">
+                    <div style="background: linear-gradient(135deg, #F1F5F9 0%, #E2E8F0 100%); padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem;">
+                        <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Ingreso Base de Cotización (IBC)</div>
+                        <div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);">$${ibc.toLocaleString('es-CO')}</div>
+                    </div>
+
+                    <div style="margin-bottom: 1rem;">
+                        <h3 style="font-size: 0.9rem; color: var(--text-secondary); font-weight: 500; margin-bottom: 1rem;">Aportes al Sistema (Proporcional a ${dias} día${dias > 1 ? 's' : ''})</h3>
+            `;
+
+            // EPS
+            if (componentes.includes('EPS')) {
+                resultHTML += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; margin-bottom: 0.5rem; background: #F8FAFC; border-radius: 8px; border-left: 3px solid #3B82F6;">
+                        <div>
+                            <div style="font-weight: 600; color: var(--text-primary);">EPS (Salud)</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">${PORCENTAJES.eps}%</div>
+                        </div>
+                        <div style="font-size: 1.25rem; font-weight: 700; color: #3B82F6;">$${breakdown.eps.toLocaleString('es-CO')}</div>
+                    </div>
+                `;
+            }
+
+            // CCF (siempre presente en todos los planes)
+            const ccfTexto = breakdown.ccfCalculado ? `${PORCENTAJES.ccf}%` : 'Valor mínimo fijo';
+            resultHTML += `
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; margin-bottom: 0.5rem; background: #F8FAFC; border-radius: 8px; border-left: 3px solid #10B981;">
+                    <div>
+                        <div style="font-weight: 600; color: var(--text-primary);">CCF (Caja Compensación)</div>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary);">${ccfTexto}</div>
+                    </div>
+                    <div style="font-size: 1.25rem; font-weight: 700; color: #10B981;">$${breakdown.ccf.toLocaleString('es-CO')}</div>
+                </div>
+            `;
+
+            // AFP
+            if (componentes.includes('AFP')) {
+                resultHTML += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; margin-bottom: 0.5rem; background: #F8FAFC; border-radius: 8px; border-left: 3px solid #A855F7;">
+                        <div>
+                            <div style="font-weight: 600; color: var(--text-primary);">AFP (Pensión)</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">${PORCENTAJES.afp}%</div>
+                        </div>
+                        <div style="font-size: 1.25rem; font-weight: 700; color: #A855F7;">$${breakdown.afp.toLocaleString('es-CO')}</div>
+                    </div>
+                `;
+            }
+
+            // ARL
+            if (componentes.includes('ARL')) {
+                resultHTML += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; margin-bottom: 0.5rem; background: #F8FAFC; border-radius: 8px; border-left: 3px solid #F59E0B;">
+                        <div>
+                            <div style="font-weight: 600; color: var(--text-primary);">ARL (Riesgos Laborales)</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">${selectedRiskPercentage}%</div>
+                        </div>
+                        <div style="font-size: 1.25rem; font-weight: 700; color: #F59E0B;">$${breakdown.arl.toLocaleString('es-CO')}</div>
+                    </div>
+                `;
+            }
+
+            // Subtotal de Aportes
+            resultHTML += `
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; margin-bottom: 1rem; background: #F1F5F9; border-radius: 8px; border: 2px solid #CBD5E1;">
+                        <div>
+                            <div style="font-weight: 600; color: var(--text-primary);">Subtotal (Aportes)</div>
+                            <div style="font-size: 0.75rem; color: var(--text-secondary);">Total real sin ajustes</div>
+                        </div>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">$${subtotalAportes.toLocaleString('es-CO')}</div>
+                    </div>
+            `;
+
+            // Cuota Administrativa
+            const esCuotaCompleta = dias < 30 && !document.getElementById('prorratearAdmin').checked;
+            resultHTML += `
+                    <div style="padding: 1.25rem; margin-bottom: 0.75rem; background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); border-radius: 8px; border: 2px solid #F59E0B;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="font-weight: 600; color: #92400E; font-size: 1.1rem;">Cuota Administrativa</div>
+                                <div style="font-size: 0.75rem; color: #92400E; margin-top: 0.25rem;">${esCuotaCompleta ? 'Siempre se cobra completa (no proporcional)' : dias === 30 ? 'Mes completo' : 'Prorrateada y ajustada'}</div>
+                            </div>
+                            <div style="font-size: 1.5rem; font-weight: 700; color: #B45309;">$${breakdown.cuotaAdmin.toLocaleString('es-CO')}</div>
+                        </div>
+                    </div>
+            `;
+
+            // Descuento Aplicado
+            if (breakdown.descuento && breakdown.descuento > 0) {
+                resultHTML += `
+                    <div style="padding: 1.25rem; margin-bottom: 0.75rem; background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%); border-radius: 8px; border: 2px solid #10B981;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="font-weight: 600; color: #065F46; font-size: 1.1rem;">Descuento Aplicado</div>
+                                <div style="font-size: 0.75rem; color: #065F46; margin-top: 0.25rem;">${descuentoPorcentaje}% sobre cuota administrativa</div>
+                            </div>
+                            <div style="font-size: 1.5rem; font-weight: 700; color: #059669;">-$${breakdown.descuento.toLocaleString('es-CO')}</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Total a Pagar
+            resultHTML += `
+                    <div style="padding: 2rem 1.5rem; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); border-radius: 12px; margin-top: 1.5rem; text-align: center;">
+                        <div style="font-size: 0.9rem; color: rgba(255,255,255,0.9); margin-bottom: 0.5rem;">Total a Pagar</div>
+                        <div style="font-size: 3rem; font-weight: 700; color: white; font-family: 'Poppins', sans-serif;">$${total.toLocaleString('es-CO')}</div>
+                    </div>
+                </div>
+            `;
+
+            resultContent.innerHTML = resultHTML;
+        }
+
+        // Inicializar - establecer día 1 del mes actual como predeterminado
+        window.onload = function() {
+            const hoy = new Date();
+            const año = hoy.getFullYear();
+            const mes = hoy.getMonth();
+            
+            // Primer día del mes actual
+            const primerDia = new Date(año, mes, 1);
+            const fechaIngreso = primerDia.toISOString().split('T')[0];
+            document.getElementById('fechaIngreso').value = fechaIngreso;
+            
+            calculateDaysFromIngreso();
+        };
+    </script>
+</body>
+</html>

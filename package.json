@@ -1,0 +1,34 @@
+{
+  "name": "cotizador-seguridad-social-cervialis",
+  "version": "1.0.0",
+  "description": "Aplicación web interactiva para calcular cotizaciones de seguridad social en Colombia según normativa PILA 2026",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8000 || python3 -m http.server 8000",
+    "deploy": "bash deploy.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TU-USUARIO/cotizador-seguridad-social-cervialis.git"
+  },
+  "keywords": [
+    "seguridad-social",
+    "colombia",
+    "pila",
+    "cotizador",
+    "salud",
+    "pension",
+    "arl",
+    "ccf",
+    "afp",
+    "eps",
+    "calculadora",
+    "cervialis"
+  ],
+  "author": "Cervialis",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/TU-USUARIO/cotizador-seguridad-social-cervialis/issues"
+  },
+  "homepage": "https://TU-USUARIO.github.io/cotizador-seguridad-social-cervialis/"
+}
