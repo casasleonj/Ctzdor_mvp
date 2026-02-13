@@ -504,7 +504,7 @@
                     <label for="ibc">IBC - Ingreso Base de Cotización</label>
                     <div class="input-wrapper">
                         <span class="currency-symbol">$</span>
-                        <input type="text" id="ibc" value="1,750,905" oninput="formatCurrency(this); calculate()">
+                        <input type="text" inputmode="numeric" id="ibc" value="1,750,905" oninput="formatCurrency(this); calculate()">
                     </div>
                     <div class="info-box">
                         SMMLV 2026: $1,750,905
@@ -517,7 +517,7 @@
                         <input type="date" id="fechaIngreso" style="padding-left: 1rem;" onchange="calculateDaysFromIngreso()">
                     </div>
                     <div class="info-box" style="margin-top: 0.5rem;">
-                        📅 Calcula automáticamente desde la fecha de ingreso hasta fin de mes. Mes completo = 30 días según normativa PILA.
+                        📅 Selecciona o escribe la fecha. Calcula automáticamente hasta fin de mes.
                     </div>
                 </div>
 
@@ -543,7 +543,7 @@
                 <div class="form-group">
                     <label for="descuento">Descuento sobre Cuota Administrativa (%)</label>
                     <div class="input-wrapper">
-                        <input type="number" id="descuento" value="0" min="0" max="50" step="0.1" 
+                        <input type="text" inputmode="decimal" id="descuento" value="" min="0" max="50" 
                                style="padding-left: 1rem;" oninput="validarDescuento()" placeholder="0" 
                                onkeypress="return soloNumerosPositivos(event)"
                                onpaste="validarPegado(event)">
@@ -687,17 +687,24 @@
             const fechaIngreso = document.getElementById('fechaIngreso').value;
             const displayElement = document.getElementById('diasDisplay');
             const periodoElement = document.getElementById('periodoDisplay');
+            const toggleProrrateo = document.getElementById('prorratearAdmin');
 
             if (!fechaIngreso) {
                 displayElement.textContent = 'Selecciona la fecha de ingreso';
                 displayElement.style.color = 'var(--text-secondary)';
                 periodoElement.textContent = '';
                 diasCotizar = 0;
+                // Deshabilitar toggle de prorrateo
+                toggleProrrateo.disabled = true;
+                toggleProrrateo.checked = false;
+                toggleProrrateo.parentElement.style.opacity = '0.5';
+                toggleProrrateo.parentElement.style.cursor = 'not-allowed';
                 return;
             }
 
-            // Parsear fecha de ingreso correctamente sin problemas de zona horaria
+            // Parsear fecha en formato yyyy-mm-dd (input type="date")
             const [año, mes, dia] = fechaIngreso.split('-').map(Number);
+            
             const ingreso = new Date(año, mes - 1, dia);
 
             // Calcular último día del mes de ingreso
@@ -718,6 +725,11 @@
                 displayElement.textContent = '✓ 30 días (mes completo)';
                 displayElement.style.color = 'var(--secondary)';
                 periodoElement.textContent = `Del 1 al ${ultimoDiaMes} de ${nombreMes}`;
+                // Deshabilitar toggle de prorrateo (no tiene sentido en mes completo)
+                toggleProrrateo.disabled = true;
+                toggleProrrateo.checked = false;
+                toggleProrrateo.parentElement.style.opacity = '0.5';
+                toggleProrrateo.parentElement.style.cursor = 'not-allowed';
             } else {
                 // Días parciales: calcular diferencia + 1 (incluye día de ingreso)
                 const diffTime = Math.abs(finMes - ingreso);
@@ -726,6 +738,10 @@
                 displayElement.textContent = `${diffDays} día${diffDays > 1 ? 's' : ''} a cotizar`;
                 displayElement.style.color = 'var(--primary)';
                 periodoElement.textContent = `Del ${dia} al ${ultimoDiaMes} de ${nombreMes}`;
+                // Habilitar toggle de prorrateo (solo disponible en días parciales)
+                toggleProrrateo.disabled = false;
+                toggleProrrateo.parentElement.style.opacity = '1';
+                toggleProrrateo.parentElement.style.cursor = 'pointer';
             }
 
             calculate();
@@ -791,18 +807,27 @@
 
         function validarDescuento() {
             const descuentoInput = document.getElementById('descuento');
-            let valor = parseFloat(descuentoInput.value);
+            let valor = descuentoInput.value.trim();
             
-            // Si no es un número válido, establecer en 0
+            // Si está vacío, dejarlo vacío y tratar como 0
+            if (valor === '') {
+                aplicarDescuento();
+                return;
+            }
+            
+            // Convertir a número
+            valor = parseFloat(valor);
+            
+            // Si no es un número válido, limpiar el campo
             if (isNaN(valor) || valor < 0) {
-                descuentoInput.value = 0;
-                valor = 0;
+                descuentoInput.value = '';
+                aplicarDescuento();
+                return;
             }
             
             // Si excede el máximo de 50%, limitarlo
             if (valor > 50) {
-                descuentoInput.value = 50;
-                valor = 50;
+                descuentoInput.value = '50';
             }
             
             // Aplicar el descuento validado
@@ -840,10 +865,18 @@
                 prorratearCheckbox.parentElement.style.opacity = '0.5';
                 prorratearCheckbox.parentElement.style.cursor = 'not-allowed';
             } else {
-                // Si no hay descuento, habilitar prorrateo
-                prorratearCheckbox.disabled = false;
-                prorratearCheckbox.parentElement.style.opacity = '1';
-                prorratearCheckbox.parentElement.style.cursor = 'pointer';
+                // Si no hay descuento, habilitar prorrateo SOLO si hay días parciales
+                if (diasCotizar < 30 && diasCotizar > 0) {
+                    prorratearCheckbox.disabled = false;
+                    prorratearCheckbox.parentElement.style.opacity = '1';
+                    prorratearCheckbox.parentElement.style.cursor = 'pointer';
+                } else {
+                    // Mes completo o sin fecha: mantener deshabilitado
+                    prorratearCheckbox.checked = false;
+                    prorratearCheckbox.disabled = true;
+                    prorratearCheckbox.parentElement.style.opacity = '0.5';
+                    prorratearCheckbox.parentElement.style.cursor = 'not-allowed';
+                }
             }
             
             calculate();
@@ -1153,12 +1186,18 @@
         window.onload = function() {
             const hoy = new Date();
             const año = hoy.getFullYear();
-            const mes = hoy.getMonth();
+            const mes = String(hoy.getMonth() + 1).padStart(2, '0');
             
-            // Primer día del mes actual
-            const primerDia = new Date(año, mes, 1);
-            const fechaIngreso = primerDia.toISOString().split('T')[0];
-            document.getElementById('fechaIngreso').value = fechaIngreso;
+            // Primer día del mes actual en formato yyyy-mm-dd (input type="date")
+            const fechaFormateada = `${año}-${mes}-01`;
+            document.getElementById('fechaIngreso').value = fechaFormateada;
+            
+            // Deshabilitar toggle de prorrateo inicialmente (será habilitado si hay días parciales)
+            const toggleProrrateo = document.getElementById('prorratearAdmin');
+            toggleProrrateo.disabled = true;
+            toggleProrrateo.checked = false;
+            toggleProrrateo.parentElement.style.opacity = '0.5';
+            toggleProrrateo.parentElement.style.cursor = 'not-allowed';
             
             calculateDaysFromIngreso();
         };
