@@ -486,6 +486,44 @@
         .toggle-switch input:disabled + .toggle-slider:before {
             background-color: #CBD5E1;
         }
+
+        /* Badge de Fecha Actual */
+        #fechaActualBadge {
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive para móviles */
+        @media (max-width: 640px) {
+            #fechaActualBadge {
+                padding: 0.6rem 0.8rem !important;
+                margin-top: 0.75rem !important;
+            }
+            #fechaActualBadge > div {
+                gap: 0.5rem !important;
+            }
+            #fechaActualBadge svg {
+                width: 18px !important;
+                height: 18px !important;
+            }
+            #fechaActualBadge > div > div:first-child {
+                width: 32px !important;
+                height: 32px !important;
+            }
+            #fechaActualTexto {
+                font-size: 0.85rem !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -493,6 +531,24 @@
         <header>
             <h1>Cotizador de Seguridad Social</h1>
             <p class="subtitle">Cervialis - Planes 2026</p>
+            
+            <!-- Badge de Fecha Actual -->
+            <div id="fechaActualBadge" style="background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%); border: 2px solid #3B82F6; border-radius: 12px; padding: 0.75rem 1rem; margin-top: 1rem; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15); max-width: 400px; margin-left: auto; margin-right: auto;">
+                <div style="display: flex; align-items: center; gap: 0.75rem; justify-content: center;">
+                    <div style="background: #3B82F6; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                    </div>
+                    <div style="flex: 1; text-align: center;">
+                        <div style="font-size: 0.7rem; color: #6B7280; font-weight: 500; margin-bottom: 0.15rem;">Fecha Actual del Sistema</div>
+                        <div id="fechaActualTexto" style="font-size: 0.95rem; color: #1E40AF; font-weight: 700; line-height: 1.2;">Cargando...</div>
+                    </div>
+                </div>
+            </div>
         </header>
 
         <div class="main-content">
@@ -517,27 +573,13 @@
                         <input type="date" id="fechaIngreso" style="padding-left: 1rem;" onchange="calculateDaysFromIngreso()">
                     </div>
                     <div class="info-box" style="margin-top: 0.5rem;">
-                        📅 Selecciona o escribe la fecha. Calcula automáticamente hasta fin de mes.
+                        📅 PILA siempre cotiza sobre 30 días, sin importar si el mes tiene 28, 29, 30 o 31 días reales.
                     </div>
                 </div>
 
                 <div class="form-group">
                     <div class="days-display" id="diasDisplay">Selecciona la fecha de ingreso</div>
                     <div id="periodoDisplay" style="text-align: center; font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.5rem;"></div>
-                </div>
-
-                <div class="form-group">
-                    <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
-                        <span style="font-weight: 500;">Prorratear Cuota Administrativa</span>
-                        <div class="toggle-switch">
-                            <input type="checkbox" id="prorratearAdmin" onchange="toggleProrrateo()">
-                            <span class="toggle-slider"></span>
-                        </div>
-                    </label>
-                    <div class="info-box" style="margin-top: 0.5rem; font-size: 0.8rem;">
-                        <strong>Desactivado:</strong> Cuota admin completa + ajuste al final<br>
-                        <strong>Activado:</strong> Cuota admin proporcional a días
-                    </div>
                 </div>
 
                 <div class="form-group">
@@ -549,7 +591,7 @@
                                onpaste="validarPegado(event)">
                     </div>
                     <div class="info-box" style="margin-top: 0.5rem; font-size: 0.8rem;">
-                        ⚠️ Máximo 50% de descuento. Se aplica solo a la cuota administrativa. No compatible con prorrateo.
+                        ⚠️ Máximo 50% de descuento. Se aplica solo a la cuota administrativa.
                     </div>
                 </div>
 
@@ -687,36 +729,24 @@
             const fechaIngreso = document.getElementById('fechaIngreso').value;
             const displayElement = document.getElementById('diasDisplay');
             const periodoElement = document.getElementById('periodoDisplay');
-            const toggleProrrateo = document.getElementById('prorratearAdmin');
 
             if (!fechaIngreso) {
                 displayElement.textContent = 'Selecciona la fecha de ingreso';
                 displayElement.style.color = 'var(--text-secondary)';
                 periodoElement.textContent = '';
                 diasCotizar = 0;
-                // Deshabilitar toggle de prorrateo
-                toggleProrrateo.disabled = true;
-                toggleProrrateo.checked = false;
-                toggleProrrateo.parentElement.style.opacity = '0.5';
-                toggleProrrateo.parentElement.style.cursor = 'not-allowed';
                 return;
             }
 
             // Parsear fecha en formato yyyy-mm-dd (input type="date")
             const [año, mes, dia] = fechaIngreso.split('-').map(Number);
             
-            const ingreso = new Date(año, mes - 1, dia);
-
-            // Calcular último día del mes de ingreso
-            const ultimoDiaMes = new Date(año, mes, 0).getDate();
-            const finMes = new Date(año, mes - 1, ultimoDiaMes);
-
             // Formatear fechas para mostrar
             const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 
                           'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
             const nombreMes = meses[mes - 1];
 
-            // Verificar si es mes completo (día 1 hasta último día del mes)
+            // Verificar si es mes completo (día 1)
             const esMesCompleto = dia === 1;
 
             if (esMesCompleto) {
@@ -724,24 +754,15 @@
                 diasCotizar = 30;
                 displayElement.textContent = '✓ 30 días (mes completo)';
                 displayElement.style.color = 'var(--secondary)';
-                periodoElement.textContent = `Del 1 al ${ultimoDiaMes} de ${nombreMes}`;
-                // Deshabilitar toggle de prorrateo (no tiene sentido en mes completo)
-                toggleProrrateo.disabled = true;
-                toggleProrrateo.checked = false;
-                toggleProrrateo.parentElement.style.opacity = '0.5';
-                toggleProrrateo.parentElement.style.cursor = 'not-allowed';
+                periodoElement.textContent = `Del 1 al 30 de ${nombreMes} (base PILA: 30 días)`;
             } else {
-                // Días parciales: calcular diferencia + 1 (incluye día de ingreso)
-                const diffTime = Math.abs(finMes - ingreso);
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-                diasCotizar = diffDays;
-                displayElement.textContent = `${diffDays} día${diffDays > 1 ? 's' : ''} a cotizar`;
+                // Días parciales: SIEMPRE sobre base de 30 días (normativa PILA)
+                // Fórmula: 30 - día_ingreso + 1
+                const diasCalculados = 30 - dia + 1;
+                diasCotizar = diasCalculados;
+                displayElement.textContent = `${diasCalculados} día${diasCalculados > 1 ? 's' : ''} a cotizar`;
                 displayElement.style.color = 'var(--primary)';
-                periodoElement.textContent = `Del ${dia} al ${ultimoDiaMes} de ${nombreMes}`;
-                // Habilitar toggle de prorrateo (solo disponible en días parciales)
-                toggleProrrateo.disabled = false;
-                toggleProrrateo.parentElement.style.opacity = '1';
-                toggleProrrateo.parentElement.style.cursor = 'pointer';
+                periodoElement.textContent = `Del ${dia} al 30 de ${nombreMes} (base PILA: 30 días)`;
             }
 
             calculate();
@@ -834,51 +855,7 @@
             aplicarDescuento();
         }
 
-        function toggleProrrateo() {
-            const prorratearAdmin = document.getElementById('prorratearAdmin').checked;
-            const descuentoInput = document.getElementById('descuento');
-            
-            if (prorratearAdmin) {
-                // Si se activa prorrateo, deshabilitar y resetear descuento
-                descuentoInput.value = 0;
-                descuentoInput.disabled = true;
-                descuentoInput.style.opacity = '0.5';
-                descuentoInput.style.cursor = 'not-allowed';
-            } else {
-                // Si se desactiva prorrateo, habilitar descuento
-                descuentoInput.disabled = false;
-                descuentoInput.style.opacity = '1';
-                descuentoInput.style.cursor = 'text';
-            }
-            
-            calculate();
-        }
-
         function aplicarDescuento() {
-            const descuento = parseFloat(document.getElementById('descuento').value) || 0;
-            const prorratearCheckbox = document.getElementById('prorratearAdmin');
-            
-            if (descuento > 0) {
-                // Si se aplica descuento, deshabilitar prorrateo
-                prorratearCheckbox.checked = false;
-                prorratearCheckbox.disabled = true;
-                prorratearCheckbox.parentElement.style.opacity = '0.5';
-                prorratearCheckbox.parentElement.style.cursor = 'not-allowed';
-            } else {
-                // Si no hay descuento, habilitar prorrateo SOLO si hay días parciales
-                if (diasCotizar < 30 && diasCotizar > 0) {
-                    prorratearCheckbox.disabled = false;
-                    prorratearCheckbox.parentElement.style.opacity = '1';
-                    prorratearCheckbox.parentElement.style.cursor = 'pointer';
-                } else {
-                    // Mes completo o sin fecha: mantener deshabilitado
-                    prorratearCheckbox.checked = false;
-                    prorratearCheckbox.disabled = true;
-                    prorratearCheckbox.parentElement.style.opacity = '0.5';
-                    prorratearCheckbox.parentElement.style.cursor = 'not-allowed';
-                }
-            }
-            
             calculate();
         }
 
@@ -915,7 +892,6 @@
 
             const ibc = getCurrencyValue(document.getElementById('ibc'));
             const dias = diasCotizar;
-            const prorratearAdmin = document.getElementById('prorratearAdmin').checked;
             const descuentoPorcentaje = parseFloat(document.getElementById('descuento').value) || 0;
 
             // Calcular porcentaje total del plan (para cálculo de cuota admin base)
@@ -957,8 +933,7 @@
             let total;
             let descuentoAplicado = 0;
 
-            // La cuota administrativa es FIJA basada en SMMLV, no varía con el IBC
-            // Solo se calcula una vez con el SMMLV base
+            // La cuota administrativa es SIEMPRE FIJA basada en SMMLV, NUNCA se prorrateavolver
             const cuotaAdminFija = cuotaAdminTabla;
 
             // Verificar si estamos en el caso base (IBC = SMMLV)
@@ -970,19 +945,8 @@
                 total = precioTabla;
                 cuotaAdmin = precioTabla - sumaEntidades;
                 
-            } else if (dias === 30 && descuentoPorcentaje === 0) {
-                // Mes completo SIN DESCUENTO, pero IBC ≠ SMMLV
-                // Aplicar redondeo a 900
-                const totalProvisional = sumaEntidades + cuotaAdminFija;
-                
-                // Redondear total para que termine en 900
-                total = redondearA900(totalProvisional);
-                
-                // Ajustar cuota admin para que la suma coincida con el total redondeado
-                cuotaAdmin = total - sumaEntidades;
-                
-            } else if (dias === 30 && descuentoPorcentaje > 0) {
-                // Mes completo CON DESCUENTO
+            } else if (descuentoPorcentaje > 0) {
+                // CON DESCUENTO (cualquier cantidad de días)
                 // 1. Aplicar descuento a la cuota admin fija
                 descuentoAplicado = cuotaAdminFija * (descuentoPorcentaje / 100);
                 const cuotaAdminConDescuento = cuotaAdminFija - descuentoAplicado;
@@ -996,47 +960,14 @@
                 cuotaAdmin = total - sumaEntidades;
                 
             } else {
-                // Días parciales: depende del toggle de prorrateo y descuento
+                // SIN DESCUENTO: Cuota admin FIJA completa + ajuste al final
+                const totalProvisional = sumaEntidades + cuotaAdminFija;
                 
-                if (prorratearAdmin) {
-                    // CON PRORRATEO (sin descuento)
-                    const cuotaAdminProrrateada = (cuotaAdminFija / 30) * dias;
-                    const cuotaAdminInicial = redondearA900(cuotaAdminProrrateada);
-                    
-                    const totalProvisional = sumaEntidades + cuotaAdminInicial;
-                    
-                    // Redondear total para que termine en 900
-                    total = redondearA900(totalProvisional);
-                    
-                    // Ajustar cuota admin para que la suma coincida con el total redondeado
-                    cuotaAdmin = total - sumaEntidades;
-                    
-                } else if (descuentoPorcentaje > 0) {
-                    // CON DESCUENTO (sin prorrateo)
-                    // 1. Aplicar descuento a cuota admin fija
-                    descuentoAplicado = cuotaAdminFija * (descuentoPorcentaje / 100);
-                    const cuotaAdminConDescuento = cuotaAdminFija - descuentoAplicado;
-                    
-                    const totalProvisional = sumaEntidades + cuotaAdminConDescuento;
-                    
-                    // 2. Redondear total para que termine en 900
-                    total = redondearA900(totalProvisional);
-                    
-                    // 3. Ajustar cuota admin para que la suma coincida con el total redondeado
-                    cuotaAdmin = total - sumaEntidades;
-                    
-                } else {
-                    // SIN PRORRATEO NI DESCUENTO: Cuota admin completa + ajuste al final
-                    const cuotaAdminInicial = cuotaAdminFija;
-                    
-                    const totalProvisional = sumaEntidades + cuotaAdminInicial;
-                    
-                    // Redondear total para que termine en 900
-                    total = redondearA900(totalProvisional);
-                    
-                    // Ajustar cuota admin para que la suma coincida con el total redondeado
-                    cuotaAdmin = total - sumaEntidades;
-                }
+                // Redondear total para que termine en 900
+                total = redondearA900(totalProvisional);
+                
+                // Ajustar cuota admin para que la suma coincida con el total redondeado
+                cuotaAdmin = total - sumaEntidades;
             }
 
             displayResults(total, { eps, arl, ccf, afp, cuotaAdmin, descuento: descuentoAplicado, ccfCalculado, ibc, smmlv: SMMLV }, componentes);
@@ -1130,17 +1061,14 @@
             // Cuota Administrativa
             const esIBCBase = ibc === SMMLV;
             const esCasoTabla = dias === 30 && descuentoPorcentaje === 0 && esIBCBase;
-            const esCuotaCompleta = dias < 30 && !document.getElementById('prorratearAdmin').checked;
             
             let mensajeCuotaAdmin;
             if (esCasoTabla) {
                 mensajeCuotaAdmin = 'Precio de tabla 2026 (IBC = SMMLV)';
             } else if (dias === 30) {
                 mensajeCuotaAdmin = 'Cuota fija + ajuste de redondeo (total termina en 900)';
-            } else if (esCuotaCompleta) {
-                mensajeCuotaAdmin = 'Cuota completa + ajuste de redondeo';
             } else {
-                mensajeCuotaAdmin = 'Prorrateada + ajuste de redondeo';
+                mensajeCuotaAdmin = 'Cuota fija completa + ajuste de redondeo';
             }
             
             resultHTML += `
@@ -1187,17 +1115,20 @@
             const hoy = new Date();
             const año = hoy.getFullYear();
             const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+            const dia = String(hoy.getDate()).padStart(2, '0');
+            
+            // Actualizar badge de fecha actual con formato completo en español
+            const diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+            const mesesCompletos = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+            const diaSemana = diasSemana[hoy.getDay()];
+            const mesNombre = mesesCompletos[hoy.getMonth()];
+            const diaNum = hoy.getDate();
+            
+            document.getElementById('fechaActualTexto').textContent = `${diaSemana}, ${diaNum} de ${mesNombre} de ${año}`;
             
             // Primer día del mes actual en formato yyyy-mm-dd (input type="date")
             const fechaFormateada = `${año}-${mes}-01`;
             document.getElementById('fechaIngreso').value = fechaFormateada;
-            
-            // Deshabilitar toggle de prorrateo inicialmente (será habilitado si hay días parciales)
-            const toggleProrrateo = document.getElementById('prorratearAdmin');
-            toggleProrrateo.disabled = true;
-            toggleProrrateo.checked = false;
-            toggleProrrateo.parentElement.style.opacity = '0.5';
-            toggleProrrateo.parentElement.style.cursor = 'not-allowed';
             
             calculateDaysFromIngreso();
         };
