@@ -34,8 +34,6 @@
 - ✅ **5 Niveles de Riesgo ARL**: Del I al V (0.522% - 6.96%)
 - ✅ **Cálculo Proporcional**: Cotización por días trabajados (1-30 días)
 - ✅ **Sistema de Descuentos**: Hasta 50% sobre cuota administrativa
-- ✅ **Prorrateo Opcional**: Cuota administrativa proporcional o completa
-- ✅ **CCF Inteligente**: Calculado (4%) o fijo ($100) según plan
 - ✅ **Interfaz Responsive**: Optimizada para móviles, tablets y desktop
 - ✅ **Cálculos Precisos**: Cumple normativa PILA Colombia 2026
 
@@ -142,10 +140,6 @@ Luego abre `http://localhost:8000` en tu navegador.
 
 ### 2. Opciones Avanzadas
 
-**Prorrateo de Cuota Administrativa:**
-- ✅ Activado: Cuota admin proporcional a días
-- ❌ Desactivado: Cuota admin completa + ajuste
-
 **Descuento (0% - 50%):**
 - Aplica solo a cuota administrativa
 - No compatible con prorrateo
@@ -156,7 +150,7 @@ Luego abre `http://localhost:8000` en tu navegador.
 El resumen muestra:
 - 📊 IBC utilizado
 - 🔵 EPS (4%)
-- 🟢 CCF (4% o $100 fijo)
+- 🟢 CCF (4%)
 - 🟣 AFP (16%)
 - 🟠 ARL (según nivel)
 - 🟡 Cuota Administrativa
@@ -226,7 +220,7 @@ El resumen muestra:
 | Entidad | Porcentaje |
 |---------|-----------|
 | EPS (Salud) | 4% |
-| CCF (Caja Compensación) | 4% o $100 fijo |
+| CCF (Caja Compensación) | 4% |
 | AFP (Pensión) | 16% |
 | ARL (Riesgos Laborales) | 0.522% - 6.96% |
 
@@ -265,7 +259,7 @@ EPS = (1,750,905 × 0.04 / 30) × 15 = $35,018 → $35,100 (redondeado)
 
 ### CCF Especial
 
-- **Plan Mínimo y Protección:** CCF = $100 fijo (no proporcional)
+- **Plan Mínimo y Protección:** CCF = 4% dle IBC (no proporcional)
 - **Plan Básico y Completo:** CCF = 4% del IBC (proporcional)
 
 ---
